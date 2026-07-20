@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOJO WEB TOOLS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f5f0ff;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0ebf8;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9b6bdf;
+            border-radius: 10px;
+        }
+
+        /* ===== HAMBURGER ===== */
+        .hamburger {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 1000;
+            background: #4c1d95;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(76, 29, 149, 0.3);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .hamburger:hover {
+            transform: scale(1.05);
+        }
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2.5px;
+            background: #fff;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 999;
+            display: none;
+            animation: fadeOverlay 0.3s ease;
+        }
+        .sidebar-overlay.open {
+            display: block;
+        }
+        @keyframes fadeOverlay {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #4c1d95, #7c3aed);
+            padding: 20px 0;
+            z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: 4px 0 30px rgba(124, 58, 237, 0.2);
+        }
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar .logo {
+            text-align: center;
+            padding: 0 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 16px;
+        }
+        .sidebar .logo h2 {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .sidebar .logo span {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.6rem;
+        }
+
+        .sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            position: relative;
+        }
+        .sidebar .menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+        .sidebar .menu-item.active {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-left-color: #ffd93d;
+        }
+        .sidebar .menu-item .icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        .sidebar .menu-item .badge {
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 0.55rem;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        /* ===== MAIN ===== */
+        .main {
+            padding: 16px 20px 20px;
+            max-width: 100%;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* ===== BANNER ===== */
+        .banner-wrapper {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        .banner-container {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(145deg, #7c3aed, #4c1d95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 60px rgba(124, 58, 237, 0.2);
+        }
+        .banner-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .banner-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 24px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7) 60%);
+        }
+        .banner-overlay .tag {
+            display: inline-block;
+            background: rgba(255, 217, 61, 0.15);
+            color: #ffd93d;
+            font-size: 0.55rem;
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 217, 61, 0.06);
+        }
+        .banner-overlay h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.1;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+        }
+        .banner-overlay p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            margin-top: 2px;
+            font-weight: 300;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.06);
+        }
+        .header .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: 56px;
+        }
+        .header .left .title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #4c1d95;
+        }
+        .header .left .version {
+            color: #9b6bdf;
+            font-size: 0.5rem;
+            background: rgba(124, 58, 237, 0.08);
+            padding: 2px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(124, 58, 237, 0.06);
+        }
+        .header .status {
+            display: flex;
+            gap: 12px;
+            font-size: 0.65rem;
+            color: #7c7c8a;
+            align-items: center;
+        }
+        .header .status .dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            margin-right: 3px;
+        }
+        .header .status .dot.online {
+            background: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+        }
+        .header .status .dot.offline {
+            background: #ef4444;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+        }
+        .header .status .online-text {
+            color: #22c55e;
+        }
+        .header .status .offline-text {
+            color: #ef4444;
+        }
+        .header .status .clock {
+            color: #7c7c8a;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ===== PAGE ===== */
+        .page {
+            display: none;
+            animation: fadePage 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadePage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== TOOLS ===== */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin: 8px 0 4px;
+        }
+        .tool-item {
+            background: #fff;
+            border: 1px solid rgba(124, 58, 237, 0.06);
+            border-radius: 14px;
+            padding: 16px 4px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);
+        }
+        .tool-item:hover {
+            border-color: rgba(124, 58, 237, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.08);
+        }
+        .tool-item:active {
+            transform: scale(0.96);
+        }
+        .tool-item .icon-svg {
+            width: 1.8rem;
+            height: 1.8rem;
+            color: #4c1d95;
+        }
+        .tool-item .icon-svg svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+        .tool-item .label {
+            font-size: 0.5rem;
+            color: #4c1d95;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .tool-item .badge-hot {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            font-size: 0.3rem;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            padding: 1px 5px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        /* ===== TOOL FORM ===== */
+        .tool-form {
+            display: none;
+            background: #fff;
+            border: 1px solid rgba(124, 58, 237, 0.06);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin: 6px 0 12px;
+            animation: slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.04);
+        }
+        .tool-form.show {
+            display: block;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .tool-form .form-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2px;
+        }
+        .tool-form .form-header .title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a1a2e;
+        }
+        .tool-form .form-header .close-btn {
+            background: none;
+            border: none;
+            color: #9b6bdf;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 6px;
+            margin-left: auto;
+            transition: 0.3s;
+            line-height: 1;
+        }
+        .tool-form .form-header .close-btn:hover {
+            color: #4c1d95;
+            transform: rotate(90deg);
+        }
+        .tool-form .form-desc {
+            color: #7c7c8a;
+            font-size: 0.65rem;
+            margin-bottom: 8px;
+            padding-left: 2px;
+        }
+        .tool-form .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .tool-form .form-row input {
+            padding: 8px 12px;
+            border: 1px solid rgba(124, 58, 237, 0.08);
+            border-radius: 10px;
+            background: #f8f5ff;
+            color: #1a1a2e;
+            font-size: 0.75rem;
+            flex: 1;
+            min-width: 140px;
+            transition: 0.3s;
+            outline: none;
+        }
+        .tool-form .form-row input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.04);
+        }
+        .tool-form .form-row input::placeholder {
+            color: #b8b8c8;
+        }
+        .tool-form .form-row .btn-execute {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+        }
+        .tool-form .form-row .btn-execute:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+        }
+        .tool-form .form-row .btn-execute:active {
+            transform: scale(0.97);
+        }
+        .tool-form .result {
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: #f8f5ff;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            max-height: 180px;
+            overflow-y: auto;
+            word-break: break-all;
+            border: 1px solid rgba(124, 58, 237, 0.04);
+            display: none;
+            line-height: 1.7;
+        }
+        .tool-form .result.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .tool-form .result a {
+            color: #7c3aed;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .tool-form .result a:hover {
+            text-decoration: underline;
+        }
+        .tool-form .result img {
+            max-width: 100%;
+            border-radius: 8px;
+            max-height: 120px;
+            object-fit: cover;
+        }
+        .tool-form .result audio {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .tool-form .result .loading {
+            color: #7c3aed;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+        .tool-form .result .error {
+            color: #ef4444;
+        }
+        .tool-form .result .success {
+            color: #22c55e;
+        }
+
+        /* ===== PRODUK ===== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .product-card {
+            background: #fff;
+            border: 1px solid rgba(124, 58, 237, 0.06);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.08);
+        }
+        .product-card .product-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            background: #f0ebf8;
+        }
+        .product-card .product-body {
+            padding: 10px 12px;
+        }
+        .product-card .product-body .name {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #1a1a2e;
+            margin-bottom: 3px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .product-card .product-body .price {
+            color: #7c3aed;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .product-card .product-body .btn-order {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 5px 14px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .product-card .product-body .btn-order:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+        }
+
+        /* ===== TESTIMONI ===== */
+        .testimoni-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .testimoni-card {
+            background: #fff;
+            border: 1px solid rgba(124, 58, 237, 0.06);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);
+        }
+        .testimoni-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.08);
+        }
+        .testimoni-card .testi-img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 8px;
+            border: 3px solid #7c3aed;
+        }
+        .testimoni-card .testi-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1a1a2e;
+        }
+        .testimoni-card .testi-text {
+            color: #7c7c8a;
+            font-size: 0.7rem;
+            margin-top: 4px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .testimoni-card .testi-stars {
+            color: #ffd93d;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #4c1d95;
+            padding: 12px 0 6px;
+            border-bottom: 2px solid rgba(124, 58, 237, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .count {
+            font-size: 0.65rem;
+            color: #9b6bdf;
+            font-weight: 400;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 8px 0 4px;
+            color: #c8c8d8;
+            font-size: 0.5rem;
+            border-top: 1px solid rgba(124, 58, 237, 0.04);
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+        .footer span {
+            color: #9b6bdf;
+        }
+
+        /* ===== FLOATING CHAT BUTTON ===== */
+        .chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 1.6rem;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-fab:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.5);
+        }
+        .chat-fab:active {
+            transform: scale(0.95);
+        }
+        .chat-fab .badge-msg {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 0.5rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 12px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* ===== CHAT ROOM UI ===== */
+        .chat-room {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 420px;
+            max-width: 100vw;
+            height: 85vh;
+            max-height: 600px;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUpChat 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(124, 58, 237, 0.06);
+            border-bottom: none;
+        }
+        .chat-room.open {
+            display: flex;
+        }
+        @keyframes slideUpChat {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chat-room .chat-header {
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .chat-room .chat-header .title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-room .chat-header .title .status {
+            font-size: 0.5rem;
+            color: #4ade80;
+        }
+        .chat-room .chat-header .close-chat {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            padding: 0 4px;
+        }
+        .chat-room .chat-header .close-chat:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+
+        .chat-room .chat-messages {
+            flex: 1;
+            padding: 16px 18px;
+            overflow-y: auto;
+            background: #f8f5ff;
+            min-height: 200px;
+            max-height: calc(100% - 110px);
+        }
+        .chat-room .chat-messages .msg {
+            margin-bottom: 10px;
+            padding: 8px 14px;
+            border-radius: 14px;
+            max-width: 85%;
+            word-break: break-word;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            animation: msgIn 0.25s ease;
+        }
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .chat-room .chat-messages .msg.user {
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-room .chat-messages .msg.bot {
+            background: #fff;
+            color: #1a1a2e;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(124, 58, 237, 0.06);
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04);
+        }
+        .chat-room .chat-messages .msg.bot .cmd-hint {
+            color: #9b6bdf;
+            font-size: 0.6rem;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid rgba(124, 58, 237, 0.04);
+        }
+        .chat-room .chat-messages .msg .time {
+            font-size: 0.45rem;
+            opacity: 0.5;
+            margin-top: 4px;
+            display: block;
+        }
+        .chat-room .chat-messages .msg .media-link {
+            display: inline-block;
+            padding: 4px 12px;
+            margin-top: 4px;
+            background: rgba(124, 58, 237, 0.08);
+            border-radius: 6px;
+            color: #7c3aed;
+            text-decoration: none;
+            font-size: 0.7rem;
+        }
+        .chat-room .chat-messages .msg .media-link:hover {
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        .chat-room .chat-input-area {
+            padding: 10px 16px;
+            border-top: 1px solid rgba(124, 58, 237, 0.06);
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+            background: #fff;
+        }
+        .chat-room .chat-input-area input {
+            flex: 1;
+            padding: 8px 14px;
+            border: 1px solid rgba(124, 58, 237, 0.08);
+            border-radius: 12px;
+            font-size: 0.8rem;
+            outline: none;
+            background: #f8f5ff;
+            color: #1a1a2e;
+            transition: 0.3s;
+        }
+        .chat-room .chat-input-area input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.04);
+        }
+        .chat-room .chat-input-area input::placeholder {
+            color: #b8b8c8;
+        }
+        .chat-room .chat-input-area .send-btn {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .chat-room .chat-input-area .send-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+        }
+        .chat-room .chat-input-area .send-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .tools-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .testimoni-grid {
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            }
+        }
+        @media (max-width: 768px) {
+            .main {
+                padding: 12px 14px 12px;
+            }
+            .header .left {
+                margin-left: 48px;
+            }
+            .tools-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 10px;
+            }
+            .testimoni-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            .banner-overlay h1 {
+                font-size: 1.2rem;
+            }
+            .banner-overlay p {
+                font-size: 0.6rem;
+            }
+            .banner-overlay {
+                padding: 14px 16px;
+            }
+            .header .status {
+                font-size: 0.5rem;
+                gap: 6px;
+            }
+            .tool-item {
+                padding: 12px 3px 10px;
+            }
+            .tool-item .icon-svg {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+            .tool-item .label {
+                font-size: 0.45rem;
+            }
+            .tool-form {
+                padding: 12px 14px;
+            }
+            .tool-form .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .tool-form .form-row input {
+                min-width: unset;
+            }
+            .tool-form .form-row .btn-execute {
+                justify-content: center;
+                padding: 8px;
+            }
+            .testimoni-card .testi-img {
+                width: 60px;
+                height: 60px;
+            }
+            .chat-room {
+                width: 100vw;
+                max-height: 80vh;
+                border-radius: 16px 16px 0 0;
+            }
+            .chat-fab {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+                bottom: 16px;
+                right: 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            .main {
+                padding: 10px 10px 8px;
+            }
+            .header .left {
+                margin-left: 44px;
+            }
+            .header .left .title {
+                font-size: 0.8rem;
+            }
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 8px;
+            }
+            .testimoni-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+            .product-card .product-body .name {
+                font-size: 0.65rem;
+            }
+            .product-card .product-body .price {
+                font-size: 0.75rem;
+            }
+            .banner-overlay h1 {
+                font-size: 1rem;
+            }
+            .banner-overlay .tag {
+                font-size: 0.4rem;
+                padding: 2px 8px;
+            }
+            .sidebar {
+                width: 250px;
+                left: -250px;
+            }
+            .hamburger {
+                top: 12px;
+                left: 12px;
+                padding: 8px 10px;
+            }
+            .hamburger span {
+                width: 20px;
+                height: 2px;
+            }
+            .testimoni-card .testi-img {
+                width: 50px;
+                height: 50px;
+            }
+            .testimoni-card .testi-name {
+                font-size: 0.7rem;
+            }
+            .testimoni-card .testi-text {
+                font-size: 0.6rem;
+            }
+            .chat-room {
+                max-height: 70vh;
+            }
+            .chat-fab {
+                width: 44px;
+                height: 44px;
+                font-size: 1.2rem;
+                bottom: 12px;
+                right: 12px;
+            }
+            .chat-room .chat-header .title {
+                font-size: 0.8rem;
+            }
+            .chat-room .chat-messages .msg {
+                font-size: 0.7rem;
+                max-width: 92%;
+            }
+            .chat-room .chat-input-area input {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+            .chat-room .chat-input-area .send-btn {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HAMBURGER ===== -->
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- ===== OVERLAY ===== -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <h2>🔥 GOJO</h2>
+            <span>v2.0</span>
+        </div>
+        <div class="menu-item active" onclick="showPage('tools')">
+            <span class="icon">🛠️</span>
+            <span>Tools</span>
+        </div>
+        <div class="menu-item" onclick="showPage('produk')">
+            <span class="icon">🛒</span>
+            <span>Produk</span>
+            <span class="badge">24</span>
+        </div>
+        <div class="menu-item" onclick="showPage('testimoni')">
+            <span class="icon">⭐</span>
+            <span>Testimoni</span>
+            <span class="badge">50</span>
+        </div>
+    </div>
+
+    <!-- ===== MAIN ===== -->
+    <div class="main">
+
+        <!-- ===== BANNER ===== -->
+        <div class="banner-wrapper">
+            <div class="banner-container">
+                <img src="https://b.top4top.io/p_3853hq91r1.jpg" alt="GOJO BANNER">
+                <div class="banner-overlay">
+                    <div class="tag">⚡ 8 Tools</div>
+                    <h1>GOJO WEB TOOLS</h1>
+                    <p>Downloader, HD, Music &amp; Marketplace</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="left">
+                <span class="title">GOJO TOOLS</span>
+                <span class="version">v2.0</span>
+            </div>
+            <div class="status">
+                <span>
+                    <span class="dot online" id="statusDot"></span>
+                    <span id="statusText" class="online-text">Online</span>
+                </span>
+                <span class="clock">🕐 <span id="timeStatus">00:00:00</span> WIB</span>
+            </div>
+        </div>
+
+        <!-- ===== PAGE: TOOLS ===== -->
+        <div class="page active" id="page-tools">
+            <div class="tools-grid" id="allToolsGrid"></div>
+            <div id="allToolsForm"></div>
+        </div>
+
+        <!-- ===== PAGE: PRODUK ===== -->
+        <div class="page" id="page-produk">
+            <div class="section-title">
+                🛒 Produk Premium
+                <span class="count">(24 produk)</span>
+            </div>
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- ===== PAGE: TESTIMONI ===== -->
+        <div class="page" id="page-testimoni">
+            <div class="section-title">
+                ⭐ Testimoni Pelanggan
+                <span class="count">(50 testimoni)</span>
+            </div>
+            <div class="testimoni-grid" id="testimoniGrid"></div>
+        </div>
+
+        <div class="footer">
+            ⚡ Powered by <span>GOJO API</span> &bull; Free to use
+        </div>
+    </div>
+
+    <!-- ===== FLOATING CHAT BUTTON ===== -->
+    <button class="chat-fab" id="chatFab" onclick="toggleChat()">
+        💬
+        <span class="badge-msg" id="chatBadge">0</span>
+    </button>
+
+    <!-- ===== CHAT ROOM ===== -->
+    <div class="chat-room" id="chatRoom">
+        <div class="chat-header" onclick="toggleChat()">
+            <div class="title">
+                🤖 GOJO Bot
+                <span class="status">● Online</span>
+            </div>
+            <button class="close-chat" onclick="event.stopPropagation();toggleChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg bot">
+                👋 Halo! Aku GOJO Bot.<br>
+                Kirim command atau tanya apapun.<br>
+                <span class="cmd-hint">📌 Contoh: /tiktok https://vt.tiktok.com/...</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Ketik pesan atau command..." onkeydown="if(event.key==='Enter') sendChat()">
+            <button class="send-btn" onclick="sendChat()">Kirim</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 🔥 SERVER URL — GANTI DENGAN URL SERVER KAMU
+        // ============================================================
+        const SERVER_URL = 'http://chos.homepanel.icu:4000'; // <-- GANTI INI
+
+        // ============================================================
+        // SIDEBAR
+        // ============================================================
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+            document.getElementById('hamburgerBtn').classList.toggle('active');
+        }
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(`page-${page}`).classList.add('active');
+            document.querySelector(`.menu-item[onclick="showPage('${page}')"]`).classList.add('active');
+            if (window.innerWidth <= 768) toggleSidebar();
+        }
+
+        // ============================================================
+        // CHAT
+        // ============================================================
+        let chatOpen = false;
+        let chatBadge = 0;
+
+        function toggleChat() {
+            chatOpen = !chatOpen;
+            document.getElementById('chatRoom').classList.toggle('open');
+            if (chatOpen) {
+                document.getElementById('chatBadge').textContent = '0';
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        function addChatMessage(text, type = 'bot', isHtml = false) {
+            const container = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            if (isHtml) {
+                div.innerHTML = text + `<span class="time">${time}</span>`;
+            } else {
+                div.textContent = text;
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'time';
+                timeSpan.textContent = time;
+                div.appendChild(timeSpan);
+            }
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+
+            addChatMessage(text, 'user');
+
+            try {
+                const res = await fetch(`${SERVER_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    let reply = data.reply;
+                    if (reply.includes('http') && (reply.includes('.mp4') || reply.includes('.jpg') || reply.includes(
+                            '.png'))) {
+                        const parts = reply.split('\n');
+                        let formatted = '';
+                        parts.forEach(line => {
+                            if (line.includes('http')) {
+                                const url = line.match(/https?:\/\/[^\s]+/)[0];
+                                formatted +=
+                                    `<a href="${url}" target="_blank" class="media-link">📎 Download</a> ${line.replace(url, '')}<br>`;
+                            } else {
+                                formatted += line + '<br>';
+                            }
+                        });
+                        addChatMessage(formatted, 'bot', true);
+                    } else {
+                        addChatMessage(reply.replace(/\n/g, '<br>'), 'bot', true);
+                    }
+                } else {
+                    addChatMessage('❌ ' + (data.message || 'Terjadi kesalahan'), 'bot');
+                }
+            } catch (err) {
+                addChatMessage('❌ Error: ' + err.message, 'bot');
+            }
+        }
+
+        // Badge notifikasi
+        setInterval(() => {
+            fetch(`${SERVER_URL}/api/chat/notify`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.count > 0 && !chatOpen) {
+                        document.getElementById('chatBadge').textContent = data.count;
+                    }
+                })
+                .catch(() => {});
+        }, 10000);
+
+        // ============================================================
+        // SVG ICONS
+        // ============================================================
+        const SVG_TIKTOK =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="currentColor" d="M16.6 5.82s.51.5 0 0A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48"/></svg>`;
+
+        const SVG_INSTAGRAM =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></svg>`;
+
+        const SVG_SPOTIFY =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="currentColor" d="M17.9 10.9C14.7 9 9.35 8.8 6.3 9.75c-.5.15-1-.15-1.15-.6c-.15-.5.15-1 .6-1.15c3.55-1.05 9.4-.85 13.1 1.35c.45.25.6.85.35 1.3c-.25.35-.85.5-1.3.25m-.1 2.8c-.25.35-.7.5-1.05.25c-2.7-1.65-6.8-2.15-9.95-1.15c-.4.1-.85-.1-.95-.5s.1-.85.5-.95c3.65-1.1 8.15-.55 11.25 1.35c.3.15.45.65.2 1m-1.2 2.75c-.2.3-.55.4-.85.2c-2.35-1.45-5.3-1.75-8.8-.95c-.35.1-.65-.15-.75-.45c-.1-.35.15-.65.45-.75c3.8-.85 7.1-.5 9.7 1.1c.35.15.4.55.25.85M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2"/></svg>`;
+
+        const SVG_HD =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M0 0h48v48H0z" fill="none"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M38.5 5.5h-29c-2.2 0-4 1.8-4 4v29c0 2.2 1.8 4 4 4h29c2.2 0 4-1.8 4-4v-29c0-2.2-1.8-4-4-4"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M15.262 20.59v-5.112h4.257M15.32 29.994v1.533l2.07-.028m2.015-1.505l-.199 1.705l11.607 1.562l.34-2.557M20.598 20.59l.85-5.851l11.892 1.79l-.625 4.062M8 28.548v-8.162h2.65c1.529 0 2.752 1.224 2.752 2.754s-1.223 2.755-2.752 2.755H8m2.851-.009l2.558 2.659m7.399-3.261c0-1.122.917-2.04 2.038-2.04s2.039.918 2.039 2.04v3.265m-4.077-5.305v5.305m4.077-3.265c0-1.122.917-2.04 2.038-2.04s2.039.918 2.039 2.04v3.265"/><circle cx="30.845" cy="20.693" r=".75" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M30.845 23.142v5.407m-12.22-1.022c-.305.612-1.019 1.02-1.732 1.02a2.046 2.046 0 0 1-2.039-2.04V25.18c0-1.122.917-2.04 2.039-2.04s2.038.918 2.038 2.04v.714h-4.077m22.169 2.656v-3.368c0-1.122-.918-2.04-2.039-2.04s-2.038.918-2.038 2.04v3.367m0-3.367v-2.04"/><circle cx="39.185" cy="20.693" r=".75" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M39.185 23.142v5.407"/></svg>`;
+
+        const SVG_CAPCUT =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M0 0h512v512H0z" fill="none"/><path fill="currentColor" d="M512 138.4V58.5l-96 50.4v-3c0-31.8-22.8-51-55.8-51H55.8C21 54.9 0 74.1 0 106v80.4L134.4 256L0 326.2v80.4C0 437.8 21 457 55.8 457h304.3c33 0 55.8-19.2 55.8-50.4v-4.2l96 51v-81L288.7 256zM211.3 295.6l165.1 86.5H45.6zM375.2 130l-163.9 85.8L45.6 130z"/></svg>`;
+
+        const SVG_PINTEREST =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="currentColor" d="M9.04 21.54c.96.29 1.93.46 2.96.46a10 10 0 0 0 10-10A10 10 0 0 0 12 2A10 10 0 0 0 2 12c0 4.25 2.67 7.9 6.44 9.34c-.09-.78-.18-2.07 0-2.96l1.15-4.94s-.29-.58-.29-1.5c0-1.38.86-2.41 1.84-2.41c.86 0 1.26.63 1.26 1.44c0 .86-.57 2.09-.86 3.27c-.17.98.52 1.84 1.52 1.84c1.78 0 3.16-1.9 3.16-4.58c0-2.4-1.72-4.04-4.19-4.04c-2.82 0-4.48 2.1-4.48 4.31c0 .86.28 1.73.74 2.3c.09.06.09.14.06.29l-.29 1.09c0 .17-.11.23-.28.11c-1.28-.56-2.02-2.38-2.02-3.85c0-3.16 2.24-6.03 6.56-6.03c3.44 0 6.12 2.47 6.12 5.75c0 3.44-2.13 6.2-5.18 6.2c-.97 0-1.92-.52-2.26-1.13l-.67 2.37c-.23.86-.86 2.01-1.29 2.7z"/></svg>`;
+
+        const SVG_COCOFUN =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>`;
+
+        const SVG_SNACK =
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M0 0h48v48H0z" fill="none"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M3.125 29.166A21.6 21.6 0 0 1 2.5 24C2.5 12.126 12.126 2.5 24 2.5S45.5 12.126 45.5 24S35.874 45.5 24 45.5c-7.116 0-13.425-3.457-17.338-8.784"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M6.506 11.5c-2.814 4.21.634 6.678.97 8.696S.16 30.963 2.5 35.28s9.575-1.85 11.594.505s2.55 5.608 5.691 5.58s5.285-.809 7.57 1.29s4.036 1.806 6.06.68"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M36.407 24.384a2.12 2.12 0 0 0 .002-3.133a32.7 32.7 0 0 0-5.743-4.202a33.3 33.3 0 0 0-6.52-2.873a2.12 2.12 0 0 0-2.704 1.566a32.7 32.7 0 0 0-.767 7.076a33.3 33.3 0 0 0 .772 7.085a2.115 2.115 0 0 0 2.697 1.56a32.7 32.7 0 0 0 6.522-2.877a33.3 33.3 0 0 0 5.74-4.202Z"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M33.698 26.397c.523-.477.524-1.3 0-1.778a18.5 18.5 0 0 0-3.258-2.384a19 19 0 0 0-3.699-1.63a1.2 1.2 0 0 0-1.534.888a18.5 18.5 0 0 0-.436 4.015c.002 1.546.194 2.909.438 4.02a1.2 1.2 0 0 0 1.53.886a18.5 18.5 0 0 0 3.701-1.633a19 19 0 0 0 3.258-2.384"/></svg>`;
+
+        // ============================================================
+        // TOOLS (8) — PAKAI SERVER_URL
+        // ============================================================
+        const TOOLS = [{
+            id: 'tiktok',
+            icon: SVG_TIKTOK,
+            label: 'TikTok',
+            desc: 'Download video TikTok tanpa watermark',
+            fields: [{ name: 'url', placeholder: 'URL TikTok...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/tiktok?url=${encodeURIComponent(p.url)}`,
+            render: (d) => {
+                if (!d?.data) return '❌ Gagal';
+                const r = d.data;
+                let h = `<strong>${r.title || 'Tanpa judul'}</strong><br>`;
+                if (r.video) h += `<a href="${r.video}" target="_blank" download>⬇️ Download Video</a><br>`;
+                if (r.audio) h += `<a href="${r.audio}" target="_blank" download>🎵 Audio</a>`;
+                return h;
+            }
+        }, {
+            id: 'instagram',
+            icon: SVG_INSTAGRAM,
+            label: 'Instagram',
+            desc: 'Download video/foto Instagram',
+            fields: [{ name: 'url', placeholder: 'URL Instagram...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/instagram?url=${encodeURIComponent(p.url)}`,
+            render: (d) => {
+                if (!d?.data) return '❌ Gagal';
+                const r = d.data;
+                let h = '';
+                const urls = r.media || r.url || [];
+                if (Array.isArray(urls)) urls.forEach(u => h +=
+                    `<a href="${u}" target="_blank" download>⬇️ Download</a><br>`);
+                else if (typeof urls === 'string') h +=
+                `<a href="${urls}" target="_blank" download>⬇️ Download</a>`;
+                if (r.caption) h += `<br><small>${r.caption.substring(0, 80)}...</small>`;
+                return h || 'Tidak ada media';
+            }
+        }, {
+            id: 'capcut',
+            icon: SVG_CAPCUT,
+            label: 'CapCut',
+            desc: 'Download video CapCut template',
+            fields: [{ name: 'url', placeholder: 'URL CapCut...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/capcut?url=${encodeURIComponent(p.url)}`,
+            render: (d) => {
+                if (!d?.data?.video) return '❌ Gagal';
+                const r = d.data;
+                let h = `<strong>${r.title || 'CapCut Template'}</strong><br>`;
+                if (r.video) h += `<a href="${r.video}" target="_blank" download>⬇️ Download Video</a><br>`;
+                if (r.thumbnail) h +=
+                    `<img src="${r.thumbnail}" style="max-width:120px;border-radius:8px;margin-top:4px;">`;
+                return h;
+            }
+        }, {
+            id: 'pinterest',
+            icon: SVG_PINTEREST,
+            label: 'Pinterest',
+            desc: 'Download gambar/video Pinterest',
+            fields: [{ name: 'url', placeholder: 'URL Pinterest...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/pinterest?url=${encodeURIComponent(p.url)}`,
+            render: (d) => {
+                if (!d?.data?.image && !d?.data?.video) return '❌ Gagal';
+                const r = d.data;
+                let h = `<strong>${r.title || 'Pinterest'}</strong><br>`;
+                if (r.image) {
+                    h +=
+                        `<a href="${r.image}" target="_blank"><img src="${r.image}" style="max-width:200px;border-radius:8px;margin:4px 0;"></a><br>`;
+                    h += `<a href="${r.image}" target="_blank" download>⬇️ Download Gambar</a><br>`;
+                }
+                if (r.video) h += `<a href="${r.video}" target="_blank" download>⬇️ Download Video</a><br>`;
+                return h;
+            }
+        }, {
+            id: 'cocofun',
+            icon: SVG_COCOFUN,
+            label: 'Cocofun',
+            desc: 'Download video Cocofun',
+            fields: [{ name: 'url', placeholder: 'URL Cocofun...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/cocofun?url=${encodeURIComponent(p.url)}`,
+            render: (d) => {
+                if (!d?.data?.no_watermark) return '❌ Gagal';
+                const r = d.data;
+                let h = `<strong>${r.caption || 'Cocofun Video'}</strong><br>`;
+                if (r.no_watermark) h +=
+                    `<a href="${r.no_watermark}" target="_blank" download>⬇️ Download Video (No WM)</a><br>`;
+                if (r.watermark) h +=
+                    `<a href="${r.watermark}" target="_blank" download>⬇️ Download Video (WM)</a><br>`;
+                if (r.thumbnail) h +=
+                    `<img src="${r.thumbnail}" style="max-width:120px;border-radius:8px;margin-top:4px;">`;
+                return h;
+            }
+        }, {
+            id: 'snackvideo',
+            icon: SVG_SNACK,
+            label: 'SnackVideo',
+            desc: 'Download video SnackVideo',
+            fields: [{ name: 'url', placeholder: 'URL SnackVideo...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/snackvideo?url=${encodeURIComponent(p.url)}`,
+            render: (d) => {
+                if (!d?.data?.video) return '❌ Gagal';
+                const r = d.data;
+                let h = `<strong>${r.title || 'SnackVideo'}</strong><br>`;
+                if (r.video) h += `<a href="${r.video}" target="_blank" download>⬇️ Download Video</a><br>`;
+                if (r.thumbnail) h +=
+                    `<img src="${r.thumbnail}" style="max-width:120px;border-radius:8px;margin-top:4px;">`;
+                if (r.author) h += `<br>👤 ${r.author}`;
+                if (r.like) h += ` ❤️ ${r.like}`;
+                return h;
+            }
+        }, {
+            id: 'hd',
+            icon: SVG_HD,
+            label: 'HD Photo',
+            desc: 'Ubah foto jadi HD (Remini style)',
+            fields: [{ name: 'imageUrl', placeholder: 'URL gambar...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/hd?imageUrl=${encodeURIComponent(p.imageUrl)}`,
+            render: (d) => {
+                if (!d?.result) return '❌ Gagal';
+                return `<a href="${d.result}" target="_blank"><img src="${d.result}" style="max-width:160px;border-radius:10px;"></a><br>
+                        <a href="${d.result}" target="_blank" download>⬇️ Download HD</a>`;
+            }
+        }, {
+            id: 'spotify',
+            icon: SVG_SPOTIFY,
+            label: 'Spotify',
+            desc: 'Cari & download lagu dari Spotify',
+            fields: [{ name: 'query', placeholder: 'Judul lagu / artis...' }],
+            endpoint: (p) => `${SERVER_URL}/api/tools/spotify?query=${encodeURIComponent(p.query)}`,
+            render: (d) => {
+                if (!d?.data) return '❌ Lagu tidak ditemukan';
+                const r = d.data;
+                let h = `<strong>${r.title || 'Lagu'}</strong> - ${r.artist || ''}<br>`;
+                if (r.audio) {
+                    h +=
+                        `<audio controls src="${r.audio}" style="width:100%;margin:4px 0;border-radius:8px;"></audio><br>`;
+                    h += `<a href="${r.audio}" target="_blank" download>⬇️ Download MP3</a>`;
+                }
+                if (r.cover) h += `<br><img src="${r.cover}" style="max-width:60px;border-radius:6px;margin-top:4px;">`;
+                return h;
+            }
+        }];
+
+        // ============================================================
+        // PRODUK (24)
+        // ============================================================
+        const PRODUCTS = [
+            { name: 'Akses Premium 7 Hari', price: 15000, image: 'https://files.catbox.moe/sample1.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Akses Premium 30 Hari', price: 45000, image: 'https://files.catbox.moe/sample2.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Akses Premium 90 Hari', price: 100000, image: 'https://files.catbox.moe/sample3.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Akses Premium 1 Tahun', price: 300000, image: 'https://files.catbox.moe/sample4.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Akses Lifetime', price: 500000, image: 'https://files.catbox.moe/sample5.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Reseller', price: 65000, image: 'https://files.catbox.moe/sample6.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket VIP', price: 180000, image: 'https://files.catbox.moe/sample7.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Owner', price: 95000, image: 'https://files.catbox.moe/sample8.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Member Permanen', price: 50000, image: 'https://files.catbox.moe/sample9.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Trial 3 Hari', price: 5000, image: 'https://files.catbox.moe/sample10.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Trial 7 Hari', price: 10000, image: 'https://files.catbox.moe/sample11.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Topup Saldo 10K', price: 10000, image: 'https://files.catbox.moe/sample12.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Topup Saldo 25K', price: 25000, image: 'https://files.catbox.moe/sample13.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Topup Saldo 50K', price: 50000, image: 'https://files.catbox.moe/sample14.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Topup Saldo 100K', price: 100000, image: 'https://files.catbox.moe/sample15.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Jasa Install Bot', price: 75000, image: 'https://files.catbox.moe/sample16.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Jasa Setting Panel', price: 50000, image: 'https://files.catbox.moe/sample17.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Jasa Custom Script', price: 150000, image: 'https://files.catbox.moe/sample18.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Bug 100x', price: 25000, image: 'https://files.catbox.moe/sample19.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Bug 500x', price: 100000, image: 'https://files.catbox.moe/sample20.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Bug Unlimited', price: 250000, image: 'https://files.catbox.moe/sample21.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Akses OTP Premium', price: 35000, image: 'https://files.catbox.moe/sample22.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Akses SMM Panel', price: 45000, image: 'https://files.catbox.moe/sample23.jpg',
+                telegram: 'https://t.me/owner' },
+            { name: 'Paket Lengkap All Access', price: 750000, image: 'https://files.catbox.moe/sample24.jpg',
+                telegram: 'https://t.me/owner' }
+        ];
+
+        // ============================================================
+        // TESTIMONI (50)
+        // ============================================================
+        const TESTIMONI = [];
+        const names = ['Andi', 'Budi', 'Cici', 'Dedi', 'Eka', 'Fani', 'Gilang', 'Hani', 'Ivan', 'Joko',
+            'Kiki', 'Lala', 'Maman', 'Nina', 'Oki', 'Putri', 'Qori', 'Rian', 'Sari', 'Tono',
+            'Umi', 'Vina', 'Wawan', 'Xena', 'Yuni', 'Zaki', 'Agus', 'Bella', 'Candra', 'Dewi',
+            'Eko', 'Fira', 'Genta', 'Hera', 'Indra', 'Jihan', 'Karla', 'Luki', 'Maya', 'Nando',
+            'Olga', 'Pandu', 'Qila', 'Raka', 'Sinta', 'Tama', 'Uli', 'Vero', 'Winda', 'Xavier'
+        ];
+
+        const texts = [
+            'Pelayanan sangat cepat dan memuaskan! 🔥',
+            'Recommended banget, gak nyesel beli! ⭐',
+            'Admin ramah, respon cepat, produk berkualitas!',
+            'Mantap jiwa, puas banget sama hasilnya!',
+            'Langsung work, gak pake ribet!',
+            'Top markotop, bakal repeat order lagi!',
+            'Sangat membantu pekerjaan saya, terima kasih!',
+            'Gas polllll, mantep banget ini mah!',
+            'Terbaik seantero jagad, wajib coba!',
+            'Cepat, murah, berkualitas, trio dewa!',
+            'Gak ngecewain, sesuai ekspektasi!',
+            'Proses cepat, hasil memuaskan!',
+            'Mantap, gak perlu pusing lagi!',
+            'Pelayanan terbaik yang pernah saya dapat!',
+            'Langsung naik level setelah pake jasa ini!',
+            'Saya pikir bakal lama, ternyata cepet banget!',
+            'Harga bersahabat, kualitas juara!',
+            'Bikin hidup lebih mudah, thanks GOJO!',
+            'Gak bakal nyesel beli disini!',
+            'Keren abis, adminnya juga ramah!',
+            'Prosesnya gampang, hasilnya memuaskan!',
+            'Udah langganan dari dulu, gak pernah kecewa!',
+            'Cocok buat yang butuh instan!',
+            'Mantap, langsung work tanpa error!',
+            'Service terbaik nomor satu!',
+            'Gak rugi beli disini, kualitas terjamin!',
+            'Cepat banget, gak nyampe 5 menit beres!',
+            'Recommended buat semua kalangan!',
+            'Hasilnya gak main-main, juara!',
+            'Terima kasih GOJO, luar biasa!',
+            'Mantap jiwa, gas terus!',
+            'Saya suka pelayanannya, ramah dan cepat!',
+            'Gak pake lama, langsung jadi!',
+            'Terbaik di kelasnya!',
+            'Buat yang masih ragu, cobain aja!',
+            'Murah, cepat, berkualitas!',
+            'Pelayanan ramah, hasil memuaskan!',
+            'Bener-bener gak ngecewain!',
+            'Udah 5x beli, selalu puas!',
+            'Ini dia solusi yang saya cari!',
+            'Gak perlu pusing lagi!',
+            'Terima kasih sudah membantu!',
+            'Luar biasa, mantap!',
+            'Sangat disarankan buat semua!',
+            'Proses gampang dan cepat!',
+            'Hasilnya sempurna, gak ada cacat!',
+            'Admin respon cepet banget!',
+            'Saya jadi lebih produktif!',
+            'Harga worth it dengan kualitas!',
+            'Gak ada kata lain selain mantap!'
+        ];
+
+        for (let i = 0; i < 50; i++) {
+            const stars = Math.floor(Math.random() * 3) + 3;
+            TESTIMONI.push({
+                name: names[i % names.length],
+                text: texts[i % texts.length],
+                image: `https://picsum.photos/seed/testi${i + 100}/200/200`,
+                stars: stars
+            });
+        }
+
+        // ============================================================
+        // RENDER
+        // ============================================================
+        function renderTools() {
+            const grid = document.getElementById('allToolsGrid');
+            const formContainer = document.getElementById('allToolsForm');
+
+            grid.innerHTML = TOOLS.map((tool, idx) => `
+                <div class="tool-item" onclick="openTool('${tool.id}')" id="icon-${tool.id}">
+                    ${idx === 0 ? '<span class="badge-hot">HOT</span>' : ''}
+                    <div class="icon-svg">${tool.icon}</div>
+                    <span class="label">${tool.label}</span>
+                </div>
+            `).join('');
+
+            formContainer.innerHTML = TOOLS.map(tool => `
+                <div class="tool-form" id="form-${tool.id}">
+                    <div class="form-header">
+                        <span class="title">${tool.label}</span>
+                        <button class="close-btn" onclick="closeTool('${tool.id}')">✕</button>
+                    </div>
+                    <div class="form-desc">${tool.desc}</div>
+                    <div class="form-row">
+                        ${tool.fields.map(f => `
+                            <input type="text" id="field-${f.name}" placeholder="${f.placeholder || ''}" data-name="${f.name}">
+                        `).join('')}
+                        <button class="btn-execute" onclick="executeTool('${tool.id}')">🚀 Execute</button>
+                    </div>
+                    <div class="result" id="result-${tool.id}"></div>
+                </div>
+            `).join('');
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = PRODUCTS.map(p => `
+                <div class="product-card">
+                    <img class="product-img" src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/200/7c3aed/fff?text=No+Image'">
+                    <div class="product-body">
+                        <div class="name">${p.name}</div>
+                        <div class="price">Rp${p.price.toLocaleString('id-ID')}</div>
+                        <a href="${p.telegram}" target="_blank" class="btn-order">🛒 Order via Telegram</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTestimoni() {
+            const grid = document.getElementById('testimoniGrid');
+            grid.innerHTML = TESTIMONI.map(t => `
+                <div class="testimoni-card">
+                    <img class="testi-img" src="${t.image}" alt="${t.name}" onerror="this.src='https://via.placeholder.com/72/7c3aed/fff?text=User'">
+                    <div class="testi-name">${t.name}</div>
+                    <div class="testi-stars">${'⭐'.repeat(t.stars)}</div>
+                    <div class="testi-text">"${t.text}"</div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================================
+        // TOOL FUNCTIONS
+        // ============================================================
+        let activeTool = null;
+
+        function openTool(id) {
+            if (activeTool && activeTool !== id) {
+                document.getElementById(`form-${activeTool}`).classList.remove('show');
+                document.getElementById(`icon-${activeTool}`).classList.remove('active');
+            }
+            const form = document.getElementById(`form-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            if (form.classList.contains('show')) {
+                form.classList.remove('show');
+                icon.classList.remove('active');
+                activeTool = null;
+                return;
+            }
+            form.classList.add('show');
+            icon.classList.add('active');
+            activeTool = id;
+            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+            const firstInput = form.querySelector('input');
+            if (firstInput) setTimeout(() => firstInput.focus(), 400);
+        }
+
+        function closeTool(id) {
+            document.getElementById(`form-${id}`).classList.remove('show');
+            document.getElementById(`icon-${id}`).classList.remove('active');
+            if (activeTool === id) activeTool = null;
+        }
+
+        async function executeTool(id) {
+            const tool = TOOLS.find(t => t.id === id);
+            if (!tool) return;
+            const resultDiv = document.getElementById(`result-${id}`);
+            resultDiv.className = 'result show';
+            resultDiv.innerHTML = `<span class="loading">⏳ Memproses...</span>`;
+            const params = {};
+            const form = document.getElementById(`form-${id}`);
+            form.querySelectorAll('input').forEach(el => {
+                const name = el.dataset.name || el.id.replace('field-', '');
+                params[name] = el.value.trim();
+            });
+            const empty = Object.entries(params).find(([k, v]) => !v);
+            if (empty) {
+                resultDiv.innerHTML = `<span class="error">❌ Field "${empty[0]}" tidak boleh kosong!</span>`;
+                return;
+            }
+            try {
+                const url = tool.endpoint(params);
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.success !== false) {
+                    const rendered = tool.render(data);
+                    resultDiv.innerHTML = rendered || '<span class="success">✅ Berhasil!</span>';
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ ${data.message || 'Terjadi kesalahan'}</span>`;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
+            }
+        }
+
+        // ============================================================
+        // ENTER KEY
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const target = e.target.closest('.tool-form');
+                if (target) {
+                    const id = target.id.replace('form-', '');
+                    executeTool(id);
+                }
+            }
+        });
+
+        // ============================================================
+        // CLOCK & STATUS
+        // ============================================================
+        function updateClock() {
+            const now = new Date();
+            const wib = now.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit',
+                second: '2-digit', hour12: false });
+            document.getElementById('timeStatus').textContent = wib;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        function updateServerStatus() {
+            fetch(`${SERVER_URL}/ping`)
+                .then(r => r.json())
+                .then(data => {
+                    const dot = document.getElementById('statusDot');
+                    const text = document.getElementById('statusText');
+                    if (data.status === 'ok') {
+                        dot.className = 'dot online';
+                        text.textContent = 'Online';
+                        text.className = 'online-text';
+                    } else {
+                        dot.className = 'dot offline';
+                        text.textContent = 'Busy';
+                        text.className = 'offline-text';
+                    }
+                })
+                .catch(() => {
+                    const dot = document.getElementById('statusDot');
+                    const text = document.getElementById('statusText');
+                    dot.className = 'dot offline';
+                    text.textContent = 'Offline';
+                    text.className = 'offline-text';
+                });
+        }
+        updateServerStatus();
+        setInterval(updateServerStatus, 30000);
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        renderTools();
+        renderProducts();
+        renderTestimoni();
+        console.log('✅ GOJO WEB TOOLS loaded!');
+    </script>
+</body>
+</html>
